@@ -1,0 +1,2 @@
+[all]
+app001 ansible_ssh_host=10.90.138.177 ansible_ssh_user=root

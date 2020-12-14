@@ -1,0 +1,65 @@
+---
+- name: Install yum utils and device-mapper-persistent-data
+  yum: name={{ item }} state=latest update_cache=yes
+  loop: [ 'yum-utils', 'device-mapper-persistent-data', 'libseccomp', 'python3-pip']
+        
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+  tags: docker
+
+- name: Enable Docker Edge repo
+  ini_file:
+    dest: /etc/yum.repos.d/docer-ce.repo
+    section: 'docker-ce-edge'
+    option: enabled
+    value: 0
+  tags: docker
+
+- name: Install Docker
+  package:
+    name: docker-ce
+    state: latest
+  tags: docker
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
+  tags: docker
+                      
+- name: Set active zone
+  firewalld:
+    zone: trusted
+    interface: eth0
+    state: enabled
+    immediate: yes
+    permanent: true
+  tags: firewall
+
+- name: Pull default Docker image
+  docker_image:
+    name: "{{ default_container_image }}"
+    source: pull
+  tags: docker_ctr
+
+- name: Create default containers
+  docker_container:
+    name: "{{ default_container_name }}"
+    image: "{{ default_container_image }}"
+    state: started
+    restart: yes
+    detach: True
+    restart_policy: always
+    env:
+      "{{ docker_env }}"
+    published_ports:
+      "{{ docker_ports }}"
+  tags: docker_ctr

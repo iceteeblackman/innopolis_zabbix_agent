@@ -1,0 +1,11 @@
+---
+# defaults file for minio run
+default_container_name: zabbix-agent
+default_container_image: zabbix/zabbix-agent:latest
+docker_env:
+# must have! defaults variables
+ ZBX_HOSTNAME: {{ ansible_hostname }} 
+ ZBX_SERVER_HOST: "10.90.138.204"
+ # end
+docker_ports:
+ - 0.0.0.0:10050:10050
